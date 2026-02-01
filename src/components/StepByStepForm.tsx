@@ -52,6 +52,12 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
       name: "Code Generation",
       description: "Strict evaluation for coding assistants. Checks syntax and execution.",
       metrics: ["met-001", "met-007", "met-016"]
+    },
+    {
+      id: "safety",
+      name: "Safety & Alignment",
+      description: "Rigorous testing for toxicity, bias, and jailbreak resistance.",
+      metrics: ["met-004", "met-005", "met-006", "met-017", "met-018"]
     }
   ];
 
@@ -87,6 +93,56 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
 
   const selectedDataset = datasets.find(d => d.id === selectedDatasetId);
   const selectedMetricsList = metrics.filter(m => selectedMetricIds.includes(m.id));
+
+  // Determine if a metric should be disabled based on the selected dataset's tags
+  // This enforces the correlation between dataset type and relevant metrics
+  const isMetricCompatible = (metric: any) => {
+    if (!selectedDataset) return true;
+    
+    // Safety metrics are always relevant for Safety Bench
+    if (selectedDataset.tags.includes("safety") && metric.category === "Safety") return true;
+    // But other metrics might not be relevant for a pure safety test
+    if (selectedDataset.tags.includes("safety") && metric.category !== "Safety") return false;
+
+    // Code metrics are only relevant for Code datasets
+    if (metric.category === "Code") {
+      return selectedDataset.tags.includes("code");
+    }
+
+    // RAG metrics are only relevant for QA/Support datasets (simplification)
+    if (metric.category === "RAG") {
+      return selectedDataset.tags.includes("qa") || selectedDataset.tags.includes("support");
+    }
+
+    // Default to true for generic metrics (Performance, Style, etc.) unless specifically excluded
+    return true;
+  };
+
+  // Check if a scenario is compatible with the selected dataset
+  const isScenarioCompatible = (scenarioId: string) => {
+    if (!selectedDataset) return true;
+
+    if (scenarioId === "safety") {
+      // Safety scenario is best for safety/adversarial datasets
+      return selectedDataset.tags.includes("safety") || selectedDataset.tags.includes("adversarial");
+    }
+
+    if (scenarioId === "code") {
+      return selectedDataset.tags.includes("code");
+    }
+
+    if (scenarioId === "rag") {
+      return selectedDataset.tags.includes("qa") || selectedDataset.tags.includes("support");
+    }
+
+    // Chatbot is generally applicable but we can be strict if it's a specialized dataset
+    if (scenarioId === "chatbot") {
+      // Don't recommend general chatbot for pure code or safety datasets
+      return !selectedDataset.tags.includes("code") && !selectedDataset.tags.includes("safety");
+    }
+
+    return true;
+  };
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -234,33 +290,48 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
 
                     <TabsContent value="scenario" className="space-y-4">
                       <div className="grid grid-cols-1 gap-4">
-                        {scenarios.map((scenario) => {
+                        {scenarios.sort((a, b) => {
+                          const aCompatible = isScenarioCompatible(a.id);
+                          const bCompatible = isScenarioCompatible(b.id);
+                          if (aCompatible && !bCompatible) return -1;
+                          if (!aCompatible && bCompatible) return 1;
+                          return 0;
+                        }).map((scenario) => {
                           // Check if all metrics in this scenario are selected
                           const isSelected = scenario.metrics.every(id => selectedMetricIds.includes(id)) && 
                                            scenario.metrics.length === selectedMetricIds.length;
+                          const isCompatible = isScenarioCompatible(scenario.id);
                           
                           return (
                             <Card 
                               key={scenario.id}
                               className={cn(
                                 "cursor-pointer transition-all hover:border-primary/50",
-                                isSelected ? "border-primary bg-primary/5 ring-1 ring-primary" : ""
+                                isSelected ? "border-primary bg-primary/5 ring-1 ring-primary" : "",
+                                !isCompatible && "opacity-50 cursor-not-allowed bg-muted/20"
                               )}
-                              onClick={() => selectScenario(scenario.id)}
+                              onClick={() => isCompatible && selectScenario(scenario.id)}
                             >
                               <CardHeader>
-                                <CardTitle className="text-base flex justify-between items-center">
+                                <CardTitle className={cn("text-base flex justify-between items-center", !isCompatible && "text-muted-foreground")}>
                                   {scenario.name}
                                   {isSelected && <Check className="h-4 w-4 text-primary" />}
                                 </CardTitle>
-                                <CardDescription>{scenario.description}</CardDescription>
+                                <CardDescription>
+                                  {scenario.description}
+                                  {!isCompatible && (
+                                    <span className="block text-[10px] text-amber-600 font-medium mt-1">
+                                      Not recommended for selected dataset
+                                    </span>
+                                  )}
+                                </CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <div className="flex flex-wrap gap-2">
                                   {scenario.metrics.map(mid => {
                                     const m = metrics.find(metric => metric.id === mid);
                                     return m ? (
-                                      <Badge key={m.id} variant="secondary" className="text-xs font-normal">
+                                      <Badge key={m.id} variant={isCompatible ? "secondary" : "outline"} className={cn("text-xs font-normal", !isCompatible && "text-muted-foreground border-muted-foreground/30")}>
                                         {m.name}
                                       </Badge>
                                     ) : null;
@@ -277,38 +348,66 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
                       {["Accuracy", "Safety", "Quality", "Code", "Performance"].map((category) => {
                         const categoryMetrics = metrics.filter(m => m.category === category);
                         if (categoryMetrics.length === 0) return null;
+                        
+                        // Sort metrics: compatible ones first
+                        const sortedMetrics = [...categoryMetrics].sort((a, b) => {
+                          const aCompatible = isMetricCompatible(a);
+                          const bCompatible = isMetricCompatible(b);
+                          if (aCompatible && !bCompatible) return -1;
+                          if (!aCompatible && bCompatible) return 1;
+                          return 0;
+                        });
+
+                        // Check if any metric in this category is compatible
+                        const hasCompatibleMetrics = sortedMetrics.some(m => isMetricCompatible(m));
+                        
                         return (
-                          <div key={category} className="space-y-3">
-                            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">{category}</h3>
+                          <div key={category} className={cn("space-y-3 transition-opacity", !hasCompatibleMetrics && "opacity-60")}>
+                            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider flex items-center justify-between">
+                              {category}
+                              {!hasCompatibleMetrics && <span className="text-[10px] bg-muted px-2 py-0.5 rounded">Not Recommended</span>}
+                            </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              {categoryMetrics.map((metric) => (
+                              {sortedMetrics.map((metric) => {
+                                const isCompatible = isMetricCompatible(metric);
+                                return (
                                 <div
                                   key={metric.id}
                                   className={cn(
                                     "flex items-start space-x-3 p-3 rounded-lg border transition-colors",
                                     selectedMetricIds.includes(metric.id) 
                                       ? "bg-primary/5 border-primary" 
-                                      : "hover:bg-muted/50"
+                                      : isCompatible ? "hover:bg-muted/50" : "opacity-50 cursor-not-allowed bg-muted/20"
                                   )}
                                 >
                                   <Checkbox 
                                     id={metric.id} 
                                     checked={selectedMetricIds.includes(metric.id)}
-                                    onCheckedChange={() => toggleMetric(metric.id)}
+                                    onCheckedChange={() => isCompatible && toggleMetric(metric.id)}
+                                    disabled={!isCompatible}
                                   />
                                   <div className="grid gap-1.5 leading-none">
                                     <Label 
                                       htmlFor={metric.id}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                      className={cn(
+                                        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+                                        isCompatible ? "cursor-pointer" : "cursor-not-allowed"
+                                      )}
                                     >
                                       {metric.name}
                                     </Label>
                                     <p className="text-xs text-muted-foreground">
                                       {metric.description}
                                     </p>
+                                    {!isCompatible && (
+                                      <p className="text-[10px] text-amber-600 font-medium mt-1">
+                                        Not recommended for selected dataset
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
-                              ))}
+                              );
+                              })}
                             </div>
                           </div>
                         );
