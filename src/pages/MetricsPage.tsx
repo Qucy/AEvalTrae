@@ -38,7 +38,8 @@ export function MetricsPage() {
       name: "Custom Consistency Check",
       description: "Checks if the response tone matches the user persona.",
       category: "Quality",
-      type: newMetricType
+      type: newMetricType,
+      cost: "0.00"
     };
     setMetrics([newMetric, ...metrics]);
     setIsDialogOpen(false);
