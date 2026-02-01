@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ds-001",
+    "name": "Customer Support QA",
+    "description": "Real-world customer support tickets and responses for evaluating empathy and accuracy.",
+    "tags": ["support", "qa", "empathy"],
+    "size": "10k samples"
+  },
+  {
+    "id": "ds-002",
+    "name": "HumanEval Python",
+    "description": "Standard benchmark for evaluating Python coding capabilities.",
+    "tags": ["code", "python", "benchmark"],
+    "size": "164 samples"
+  },
+  {
+    "id": "ds-003",
+    "name": "Safety Bench v2",
+    "description": "Adversarial prompts designed to test safety guardrails and refusal behavior.",
+    "tags": ["safety", "adversarial", "red-teaming"],
+    "size": "500 samples"
+  },
+  {
+    "id": "ds-004",
+    "name": "Medical Diagnosis Q&A",
+    "description": "Complex medical case studies with expert-verified diagnoses.",
+    "tags": ["medical", "expert", "qa"],
+    "size": "1.2k samples"
+  },
+  {
+    "id": "ds-005",
+    "name": "Legal Contract Review",
+    "description": "NDA and service agreements with annotated risk clauses.",
+    "tags": ["legal", "analysis", "contracts"],
+    "size": "300 samples"
+  },
+  {
+    "id": "ds-006",
+    "name": "GSM8K Math Problems",
+    "description": "Grade school math word problems requiring multi-step reasoning.",
+    "tags": ["math", "reasoning", "logic"],
+    "size": "8.5k samples"
+  },
+  {
+    "id": "ds-007",
+    "name": "Creative Writing Prompts",
+    "description": "Open-ended prompts for storytelling and creative content generation.",
+    "tags": ["creative", "writing", "storytelling"],
+    "size": "2k samples"
+  },
+  {
+    "id": "ds-008",
+    "name": "Financial Sentiment Analysis",
+    "description": "News headlines and tweets labeled with market sentiment.",
+    "tags": ["finance", "sentiment", "classification"],
+    "size": "50k samples"
+  },
+  {
+    "id": "ds-009",
+    "name": "Translation Corpus (En-Es)",
+    "description": "High-quality parallel text for English-Spanish translation evaluation.",
+    "tags": ["translation", "multilingual", "spanish"],
+    "size": "100k samples"
+  },
+  {
+    "id": "ds-010",
+    "name": "SQL Generation Spider",
+    "description": "Natural language questions and corresponding SQL queries across multiple domains.",
+    "tags": ["code", "sql", "database"],
+    "size": "7k samples"
+  }
+]
