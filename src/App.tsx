@@ -6,8 +6,11 @@ import { MetricsPage } from "./pages/MetricsPage";
 import Empty from "./components/Empty";
 
 function App() {
+  // Use the repository name as the base path when deployed to GitHub Pages
+  const basename = import.meta.env.BASE_URL;
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<LandingPage />} />
