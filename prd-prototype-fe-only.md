@@ -146,6 +146,31 @@ To ensure the application feels contemporary and high-quality, we will adhere to
 | Phase 3 | Day 5-6 | Interactive flows |
 | Phase 4 | Day 7 | Polish & Onboarding |
 
+## Smart Recommendation System
+
+### Filter-Based Intelligent Matching
+
+The prototype implements a sophisticated **tag-based filtering system** that transforms user intent into personalized evaluation configurations. This system addresses the key challenge of helping users navigate complex evaluation choices without requiring deep domain expertise.
+
+#### How It Works
+
+1. **Semantic Tagging**: All datasets include descriptive tags (e.g., `["support", "qa", "empathy"]`) that capture their domain and purpose
+2. **Intent Extraction**: User input is analyzed for keywords that map to predefined evaluation scenarios
+3. **Smart Filtering**: The system matches user intent to relevant datasets, metrics, and agents using tag-based filtering
+4. **Contextual Recommendations**: Results are ranked based on relevance, cost, and historical effectiveness
+
+#### Example Implementation
+
+```typescript
+// User input: "Test my RAG agent for safety"
+// Intent extracted: "rag_safety"
+// System filters datasets by safety/support tags
+// Selects Hallucination Rate, Toxicity Score, Refusal Rate metrics
+// Recommends Customer Support QA dataset + RAG agent
+```
+
+This approach provides **smooth and smart recommendations** by encoding evaluation expertise into the tag system, allowing users to get expert-level configurations through natural language interaction.
+
 ## Appendix: Demo Scripts
 
 ### Script 1: RAG Safety
