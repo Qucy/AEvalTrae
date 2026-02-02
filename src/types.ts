@@ -4,6 +4,11 @@ export interface Dataset {
   description: string;
   tags: string[];
   size: string;
+  file_format: "csv" | "json" | "jsonl" | "txt" | "tmx";
+  metadata_quality_score?: number;
+  created_at?: string;
+  application_context?: string;
+  total_records?: number;
 }
 
 export interface Metric {
@@ -27,6 +32,17 @@ export interface Agent {
   type: string;
   description: string;
   capabilities: string[];
+}
+
+export interface DatasetDetail {
+  id: string;
+  dataset_id: string;
+  input_data: any;
+  output_data?: any;
+  trajectory_data?: any;
+  ground_truth_answer?: any;
+  ground_truth_trajectory?: any;
+  row_index: number;
 }
 
 export interface Recommendation {

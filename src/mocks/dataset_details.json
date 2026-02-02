@@ -1,0 +1,18 @@
+[
+  {
+    "id": "det-001",
+    "dataset_id": "ds-001",
+    "input_data": { "query": "How do I reset my password?" },
+    "output_data": { "response": "You can reset your password by clicking on the 'Forgot Password' link on the login page." },
+    "ground_truth_answer": { "answer": "Click 'Forgot Password' on login page." },
+    "row_index": 0
+  },
+  {
+    "id": "det-002",
+    "dataset_id": "ds-001",
+    "input_data": { "query": "What are your opening hours?" },
+    "output_data": { "response": "We are open from 9 AM to 6 PM, Monday to Friday." },
+    "ground_truth_answer": { "answer": "Mon-Fri, 9 AM - 6 PM." },
+    "row_index": 1
+  }
+]

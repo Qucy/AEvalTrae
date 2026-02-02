@@ -2,7 +2,8 @@ import datasets from "./datasets.json";
 import metrics from "./metrics.json";
 import scenarios from "./scenarios.json";
 import agents from "./agents.json";
-import { Dataset, Metric, Scenario, Agent, Recommendation } from "../types";
+import datasetDetails from "./dataset_details.json";
+import { Dataset, Metric, Scenario, Agent, Recommendation, DatasetDetail } from "../types";
 
 const DELAY_MS = 500;
 
@@ -25,6 +26,11 @@ export const MockService = {
   getAgents: async (): Promise<Agent[]> => {
     await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
     return agents as Agent[];
+  },
+
+  getDatasetDetails: async (datasetId: string): Promise<DatasetDetail[]> => {
+    await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+    return (datasetDetails as DatasetDetail[]).filter(d => d.dataset_id === datasetId);
   },
 
   simulateIntentExtraction: async (input: string): Promise<string> => {

@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
 import { ChatMessage, Recommendation } from "../types";
-import { MockService } from "../mocks/MockService";
 import { v4 as uuidv4 } from "uuid";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
 
 export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -26,30 +27,24 @@ export const useChat = () => {
     setIsTyping(true);
 
     try {
-      // 1. Simulate Intent Extraction
-      const intent = await MockService.simulateIntentExtraction(content);
-      
-      // 2. Simulate Recommendation
-      const recommendation = await MockService.simulateRecommendation(intent);
+      const response = await fetch(`${API_BASE}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: content }),
+      });
 
-      // 3. Construct System Response
-      let systemContent = "I've analyzed your request. ";
-      if (intent === "rag_safety") {
-        systemContent += "Since you're focused on safety for a RAG system, I've prioritized metrics that detect hallucinations and jailbreaks.";
-      } else if (intent === "code_eval") {
-        systemContent += "For coding tasks, accuracy and execution-based metrics are crucial.";
-      } else if (intent === "general_chat") {
-        systemContent += "For general chat, we should look at tone and coherence.";
-      } else {
-        systemContent += "Here is a recommended configuration based on standard best practices.";
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
+
+      const data = await response.json();
 
       const systemMsg: ChatMessage = {
         id: uuidv4(),
         role: "system",
-        content: systemContent,
+        content: data.content,
         timestamp: Date.now(),
-        recommendation: recommendation || undefined,
+        recommendation: data.recommendation || undefined,
       };
 
       setMessages((prev) => [...prev, systemMsg]);
@@ -58,7 +53,7 @@ export const useChat = () => {
       const errorMsg: ChatMessage = {
         id: uuidv4(),
         role: "system",
-        content: "Sorry, I encountered an error while processing your request.",
+        content: "Sorry, I encountered an error while processing your request. Please ensure the backend server is running.",
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMsg]);
