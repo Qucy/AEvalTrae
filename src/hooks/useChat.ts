@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
-import { ChatMessage, Recommendation } from "../types";
+import { ChatMessage, Metric, Recommendation } from "../types";
 import { v4 as uuidv4 } from "uuid";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+import { MockService } from "../mocks/MockService";
 
 export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -16,7 +15,6 @@ export const useChat = () => {
   const [isTyping, setIsTyping] = useState(false);
 
   const sendMessage = useCallback(async (content: string) => {
-    // Add user message
     const userMsg: ChatMessage = {
       id: uuidv4(),
       role: "user",
@@ -27,24 +25,40 @@ export const useChat = () => {
     setIsTyping(true);
 
     try {
-      const response = await fetch(`${API_BASE}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content }),
-      });
+      const intent = await MockService.simulateIntentExtraction(content);
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+      if (intent === "unknown") {
+        const systemMsg: ChatMessage = {
+          id: uuidv4(),
+          role: "system",
+          content:
+            "I can help with a few demo evaluation setups. Which one best matches your goal?\n\n- RAG safety (hallucination/toxicity/refusal)\n- RAG accuracy (context adherence/relevance)\n- Code evaluation (python/coding)\n- General chat quality",
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, systemMsg]);
+        return;
       }
 
-      const data = await response.json();
+      const recommendation = await MockService.simulateRecommendation(intent);
+
+      if (!recommendation) {
+        const systemMsg: ChatMessage = {
+          id: uuidv4(),
+          role: "system",
+          content:
+            "I couldn't generate a recommendation for that request. Try something like “Test my RAG agent for safety” or “Evaluate python coding ability”.",
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, systemMsg]);
+        return;
+      }
 
       const systemMsg: ChatMessage = {
         id: uuidv4(),
         role: "system",
-        content: data.content,
+        content: `${recommendation.reason}\n\nHere’s a suggested evaluation configuration:`,
         timestamp: Date.now(),
-        recommendation: data.recommendation || undefined,
+        recommendation,
       };
 
       setMessages((prev) => [...prev, systemMsg]);
@@ -53,7 +67,7 @@ export const useChat = () => {
       const errorMsg: ChatMessage = {
         id: uuidv4(),
         role: "system",
-        content: "Sorry, I encountered an error while processing your request. Please ensure the backend server is running.",
+        content: "Sorry, I encountered an error while generating the prototype recommendation. Please try again.",
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -73,11 +87,10 @@ export const useChat = () => {
   }, []);
 
   const modifyRecommendation = useCallback((rec: Recommendation) => {
-    // This is now handled by the UI to open the dialog
-    console.log("Modify requested for scenario:", rec.scenario.id);
+    void rec;
   }, []);
 
-  const updateMetrics = useCallback((rec: Recommendation, newMetrics: any[]) => {
+  const updateMetrics = useCallback((rec: Recommendation, newMetrics: Metric[]) => {
     const updateMsg: ChatMessage = {
       id: uuidv4(),
       role: "system",
