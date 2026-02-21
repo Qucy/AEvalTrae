@@ -237,6 +237,12 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-4"
                 >
+                  <div className="space-y-2 text-center mb-8">
+                    <h3 className="text-lg font-semibold">Select a Dataset</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Choose the dataset you want to evaluate your model against.
+                    </p>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {datasets.map((ds) => (
                       <Card 
@@ -276,6 +282,12 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-6"
                 >
+                  <div className="space-y-2 text-center mb-8">
+                    <h3 className="text-lg font-semibold">Choose Metrics</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Select the metrics to measure the performance of your model.
+                    </p>
+                  </div>
                   <Tabs value={metricsMode} onValueChange={(v) => setMetricsMode(v as any)} className="w-full">
                     <TabsList className="grid w-full grid-cols-2 mb-6">
                       <TabsTrigger value="scenario">
@@ -425,14 +437,16 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-8"
                 >
-                  <div className="flex flex-col gap-1 border-b pb-4">
-                    <h3 className="text-2xl font-bold tracking-tight text-foreground/90">Review Evaluation Details</h3>
-                    <p className="text-sm text-muted-foreground">Review your configuration before starting the evaluation run.</p>
+                  <div className="space-y-2 text-center mb-8">
+                    <h3 className="text-lg font-semibold">Review Evaluation Details</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Review your configuration before starting the evaluation run.
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* LEFT COL: Main Details */}
-                    <div className="lg:col-span-2 space-y-6">
+                  <div className="flex flex-col gap-8">
+                    {/* Main Details */}
+                    <div className="space-y-6">
                       
                       {/* 1. Basic Info Card */}
                       <div className="group relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/20">
@@ -575,44 +589,40 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
                       </div>
                     </div>
 
-                    {/* RIGHT COL: Estimates Summary */}
-                    <div className="lg:col-span-1">
-                      <div className="sticky top-6 rounded-xl border bg-muted/30 p-6 shadow-sm">
-                        <div className="flex items-center gap-2 mb-6">
-                          <Sparkles className="w-4 h-4 text-amber-500" />
-                          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Summary Estimates</h3>
+                    {/* Estimates Summary */}
+                    <div className="rounded-xl border bg-muted/30 p-6 shadow-sm">
+                      <div className="flex items-center gap-2 mb-6">
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Summary Estimates</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-center justify-between group p-4 rounded-lg bg-background/50 border border-transparent hover:border-border transition-all">
+                          <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                            <Clock className="h-5 w-5" />
+                            <span className="font-medium">Duration</span>
+                          </div>
+                          <span className="font-mono text-xl font-bold text-foreground">
+                            ~{Math.max(1, Math.round(selectedMetricIds.length * 1.5))} <span className="text-sm font-normal text-muted-foreground">min</span>
+                          </span>
                         </div>
                         
-                        <div className="space-y-6">
-                          <div className="flex items-center justify-between group">
-                            <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
-                              <Clock className="h-5 w-5" />
-                              <span className="font-medium">Duration</span>
-                            </div>
-                            <span className="font-mono text-xl font-bold text-foreground">
-                              ~{Math.max(1, Math.round(selectedMetricIds.length * 1.5))} <span className="text-sm font-normal text-muted-foreground">min</span>
-                            </span>
+                        <div className="flex items-center justify-between group p-4 rounded-lg bg-background/50 border border-transparent hover:border-border transition-all">
+                          <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                            <Coins className="h-5 w-5" />
+                            <span className="font-medium">Est. Cost</span>
                           </div>
-                          
-                          <div className="flex items-center justify-between group">
-                            <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
-                              <Coins className="h-5 w-5" />
-                              <span className="font-medium">Est. Cost</span>
-                            </div>
-                            <span className="font-mono text-xl font-bold text-green-600 dark:text-green-400">
-                              ${(selectedMetricIds.length * 0.05).toFixed(2)}
-                            </span>
-                          </div>
-
-                          <div className="h-px bg-border my-6" />
-                          
-                          <div className="rounded-lg bg-background p-4 border text-xs text-muted-foreground">
-                            <p className="flex gap-2">
-                              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                              Estimates are based on average processing times and current token pricing. Actual values may vary.
-                            </p>
-                          </div>
+                          <span className="font-mono text-xl font-bold text-green-600 dark:text-green-400">
+                            ${(selectedMetricIds.length * 0.05).toFixed(2)}
+                          </span>
                         </div>
+                      </div>
+
+                      <div className="mt-6 flex items-start gap-2 text-xs text-muted-foreground bg-background/30 p-3 rounded-lg">
+                        <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        <p>
+                          Estimates are based on average processing times and current token pricing. Actual values may vary depending on model load and input complexity.
+                        </p>
                       </div>
                     </div>
                   </div>
