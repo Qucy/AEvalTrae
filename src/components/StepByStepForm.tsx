@@ -8,7 +8,7 @@ import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { ArrowLeft, ArrowRight, Check, Database, BarChart, FileCheck, Layers, ListFilter, Type } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Database, BarChart, FileCheck, Layers, ListFilter, Type, Pencil, Clock, Coins, Info, FileText, Sparkles, AlertCircle } from "lucide-react";
 import datasets from "../mocks/datasets.json";
 import metrics from "../mocks/metrics.json";
 import { cn } from "../lib/utils";
@@ -423,79 +423,196 @@ export function StepByStepForm({ onComplete, onCancel }: StepByStepFormProps) {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-6"
+                  className="space-y-8"
                 >
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Evaluation Summary</h3>
+                  <div className="flex flex-col gap-1 border-b pb-4">
+                    <h3 className="text-2xl font-bold tracking-tight text-foreground/90">Review Evaluation Details</h3>
+                    <p className="text-sm text-muted-foreground">Review your configuration before starting the evaluation run.</p>
+                  </div>
 
-                    <Card className="bg-muted/30">
-                      <CardContent className="pt-6">
-                        <div className="grid gap-1">
-                          <h4 className="font-semibold text-base">{evalName}</h4>
-                          {evalDescription && (
-                            <p className="text-sm text-muted-foreground">{evalDescription}</p>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base">Selected Dataset</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {selectedDataset ? (
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{selectedDataset.name}</p>
-                              <p className="text-sm text-muted-foreground">{selectedDataset.description}</p>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* LEFT COL: Main Details */}
+                    <div className="lg:col-span-2 space-y-6">
+                      
+                      {/* 1. Basic Info Card */}
+                      <div className="group relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                <Info className="w-4 h-4" />
+                              </div>
+                              <h4 className="font-semibold text-lg">Basic Info</h4>
                             </div>
-                            <Badge>{selectedDataset.size}</Badge>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-primary hover:text-primary/80 hover:bg-primary/5 font-medium opacity-0 group-hover:opacity-100 transition-opacity" 
+                              onClick={() => setStep(0)}
+                            >
+                              Edit
+                            </Button>
                           </div>
-                        ) : (
-                          <p className="text-destructive">No dataset selected</p>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-base flex justify-between items-center">
-                          <span>Selected Metrics</span>
-                          <Badge variant="secondary">{selectedMetricIds.length} selected</Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {selectedMetricsList.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {selectedMetricsList.map(m => (
-                              <Badge key={m.id} variant="outline" className="pl-1 pr-2 py-1">
-                                <span className={cn(
-                                  "mr-1.5 inline-block w-2 h-2 rounded-full",
-                                  m.category === "Safety" ? "bg-red-500" :
-                                  m.category === "Accuracy" ? "bg-green-500" :
-                                  "bg-blue-500"
-                                )} />
-                                {m.name}
-                              </Badge>
-                            ))}
+                          
+                          <div className="pl-1">
+                            <h3 className="text-xl font-bold text-foreground mb-2">{evalName || "Untitled Evaluation"}</h3>
+                            {evalDescription ? (
+                              <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                                {evalDescription}
+                              </p>
+                            ) : (
+                              <p className="text-muted-foreground/50 text-sm italic">No description provided</p>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-destructive">No metrics selected</p>
-                        )}
-                      </CardContent>
-                    </Card>
-                    
-                    <div className="bg-muted/30 p-4 rounded-lg border border-dashed">
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground">Estimated Duration</span>
-                        <span className="font-medium">~{Math.max(1, Math.round(selectedMetricIds.length * 1.5))} mins</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Estimated Cost</span>
-                        <span className="font-medium text-green-600 dark:text-green-400">
-                          ${(selectedMetricIds.length * 0.05).toFixed(2)}
-                        </span>
+
+                      {/* 2. Dataset Card */}
+                      <div className="group relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/20 group-hover:bg-blue-500 transition-colors" />
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <Database className="w-4 h-4" />
+                              </div>
+                              <h4 className="font-semibold text-lg">Dataset</h4>
+                              {selectedDataset && (
+                                <span className="ml-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs px-2.5 py-0.5 rounded-full font-medium border border-blue-200 dark:border-blue-800">
+                                  {selectedDataset.size} samples
+                                </span>
+                              )}
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-medium opacity-0 group-hover:opacity-100 transition-opacity" 
+                              onClick={() => setStep(1)}
+                            >
+                              Change
+                            </Button>
+                          </div>
+                          
+                          <div className="pl-1">
+                            {selectedDataset ? (
+                              <div className="flex gap-4 items-start">
+                                <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border bg-muted/50">
+                                  <FileText className="h-6 w-6 text-muted-foreground/50" />
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="font-semibold text-foreground">{selectedDataset.name}</p>
+                                  <p className="text-sm text-muted-foreground line-clamp-2">{selectedDataset.description}</p>
+                                  <div className="flex flex-wrap gap-2 pt-2">
+                                    {selectedDataset.tags.map(tag => (
+                                      <span key={tag} className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-gray-500/10">
+                                        {tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 text-destructive text-sm p-4 bg-destructive/5 rounded-lg border border-destructive/20">
+                                <AlertCircle className="w-4 h-4" />
+                                No dataset selected
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 3. Metrics Card */}
+                      <div className="group relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/20">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-purple-500/20 group-hover:bg-purple-500 transition-colors" />
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                                <BarChart className="w-4 h-4" />
+                              </div>
+                              <h4 className="font-semibold text-lg">Metrics</h4>
+                              <span className="ml-2 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs px-2.5 py-0.5 rounded-full font-medium border border-purple-200 dark:border-purple-800">
+                                {selectedMetricIds.length} selected
+                              </span>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 font-medium opacity-0 group-hover:opacity-100 transition-opacity" 
+                              onClick={() => setStep(2)}
+                            >
+                              Change
+                            </Button>
+                          </div>
+                          
+                          <div className="pl-1">
+                            {selectedMetricsList.length > 0 ? (
+                              <div className="flex flex-wrap gap-2">
+                                {selectedMetricsList.map(m => (
+                                  <div 
+                                    key={m.id} 
+                                    className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                                  >
+                                    <span className={cn(
+                                      "h-2 w-2 rounded-full",
+                                      m.category === "Safety" ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.4)]" :
+                                      m.category === "Accuracy" ? "bg-green-500 shadow-[0_0_4px_rgba(34,197,94,0.4)]" :
+                                      "bg-blue-500 shadow-[0_0_4px_rgba(59,130,246,0.4)]"
+                                    )} />
+                                    {m.name}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 text-destructive text-sm p-4 bg-destructive/5 rounded-lg border border-destructive/20">
+                                <AlertCircle className="w-4 h-4" />
+                                No metrics selected
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* RIGHT COL: Estimates Summary */}
+                    <div className="lg:col-span-1">
+                      <div className="sticky top-6 rounded-xl border bg-muted/30 p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-6">
+                          <Sparkles className="w-4 h-4 text-amber-500" />
+                          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Summary Estimates</h3>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between group">
+                            <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                              <Clock className="h-5 w-5" />
+                              <span className="font-medium">Duration</span>
+                            </div>
+                            <span className="font-mono text-xl font-bold text-foreground">
+                              ~{Math.max(1, Math.round(selectedMetricIds.length * 1.5))} <span className="text-sm font-normal text-muted-foreground">min</span>
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between group">
+                            <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                              <Coins className="h-5 w-5" />
+                              <span className="font-medium">Est. Cost</span>
+                            </div>
+                            <span className="font-mono text-xl font-bold text-green-600 dark:text-green-400">
+                              ${(selectedMetricIds.length * 0.05).toFixed(2)}
+                            </span>
+                          </div>
+
+                          <div className="h-px bg-border my-6" />
+                          
+                          <div className="rounded-lg bg-background p-4 border text-xs text-muted-foreground">
+                            <p className="flex gap-2">
+                              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                              Estimates are based on average processing times and current token pricing. Actual values may vary.
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
